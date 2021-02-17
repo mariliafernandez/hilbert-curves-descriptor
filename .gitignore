@@ -1,0 +1,10 @@
+/img
+*.png
+*.jpg
+*.jpeg
+
+/.ipynb_checkpoints
+*.ipynb
+*.ipython-version
+
+*.lock
