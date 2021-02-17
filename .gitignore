@@ -6,5 +6,6 @@
 /.ipynb_checkpoints
 *.ipynb
 *.ipython-version
+.python-version
 
-*.lock
+Pipfile.lock
