@@ -1,4 +1,5 @@
 /img
+/cifar-10-batches-py
 *.png
 *.jpg
 *.jpeg
@@ -8,4 +9,5 @@
 *.ipython-version
 .python-version
 
-Pipfile.lock
+pipfile
+pipfile.lock

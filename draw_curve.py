@@ -1,6 +1,8 @@
+# reference: http://blog.marcinchwedczuk.pl/iterative-algorithm-for-drawing-hilbert-curve
+
 from PIL import Image, ImageDraw
-import argparse
 from pathlib import Path
+
 
 def index2xy(index, N):
         
@@ -66,19 +68,6 @@ def draw(img_path, N):
         img.save( Path('.', 'img', 'hilbert_curves_N'+str(N)+'.png') ) 
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('N', help='N = [4, 8, 16, 32...]')
-    parser.add_argument('-i', help="image")
-    args = parser.parse_args()
 
-    N = int(args.N)
-
-    if args.i:
-        img = Path('.', args.i)
-    else: 
-        img = Path('.', 'img', 'lenna.png')
-
-    draw(img, N)
 
     
