@@ -1,5 +1,4 @@
 import pickle
-import argparse
 import numpy as np
 from pathlib import Path
 from PIL import Image
@@ -28,7 +27,7 @@ def rgb_from_1darray(array):
 
 
 def images_from_batch_file():
-  files = list(Path('cifar-10-batches-py').glob('**/*data_batch_*'))
+  files = list(Path('../cifar-10-batches-py').glob('**/*data_batch_*'))
   data_rgb = list()
   
   for f in files:
@@ -52,7 +51,7 @@ def save_images(images, labels):
   
   for im_array, label in zip(images, labels):
     count += 1
-    Image.fromarray(im_array).save(f'img/cifar/{label}/{count}.png')
+    Image.fromarray(im_array).save(f'../img/cifar/{label}/{count}.png')
 
 
 if __name__ == '__main__':

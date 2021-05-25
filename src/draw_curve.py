@@ -1,4 +1,4 @@
-# reference: http://blog.marcinchwedczuk.pl/iterative-algorithm-for-drawing-hilbert-curve
+# algorithm reference: http://blog.marcinchwedczuk.pl/iterative-algorithm-for-drawing-hilbert-curve
 
 from PIL import Image, ImageDraw
 from pathlib import Path
