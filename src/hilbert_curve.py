@@ -1,10 +1,13 @@
 # algorithm reference: http://blog.marcinchwedczuk.pl/iterative-algorithm-for-drawing-hilbert-curve
 
 from PIL import Image, ImageDraw
-from pathlib import Path
+from pathlib import Path, PurePath
+import numpy as np
 
+def index2xy(index, N, im_size=None):
 
-def index2xy(index, N):
+    if im_size == None or N > im_size:
+        N = im_size
         
     # x, y positions in N=2
     positions = [
@@ -46,28 +49,39 @@ def index2xy(index, N):
         n *= 2
         
     
-    x, y = 512//N*x, 512//N*y
+    x, y = im_size//N*x, im_size//N*y
         
     return x, y
 
 
+def hilbert_order(N, im_size=None):
+    img_curve = []
+
+    for i in range(0, N*N):
+        pixel_coord = index2xy(i, N, im_size)
+        img_curve.append(pixel_coord)
+    
+    return np.asarray(img_curve).flatten()
+
+
+def draw_curve_on_img(img, N):
+    curve = hilbert_order(N, img.size[0])
+    draw = ImageDraw.Draw(img)
+
+    draw.line(list(curve), width=1, fill=128)
+    
+    return img
+
+
 def draw(img_path, N):
-    prev_pixel = (0,0)
+    label  = PurePath(img_path).parts[-2]
+    name = img_path.stem
 
-    with Image.open(img_path) as img:
+    with Image.open(img_path) as f:
+        img = f.copy()
 
-        for i in range(0, N*N):
-            curr_pixel = index2xy(i, N)
-            
-            draw = ImageDraw.Draw(img)
-            draw.line(prev_pixel + curr_pixel, width=3, fill=128)
-            
-            prev_pixel = curr_pixel
-
-        
-        img.save( Path('.', 'img', 'hilbert_curves_N'+str(N)+'.png') ) 
-
-
+    img = draw_curve_on_img(img, N)
+    img.save(Path(f'img/hilbert/cifar/{label}/{name}_{N}.png'))
 
 
     

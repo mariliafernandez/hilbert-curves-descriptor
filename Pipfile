@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 pillow = "*"
 numpy = "*"
+matplotlib = "*"
+opencv-python = "*"
 
 [dev-packages]
 jupyterlab = "*"
