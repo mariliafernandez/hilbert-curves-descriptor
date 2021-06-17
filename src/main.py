@@ -18,8 +18,9 @@ if __name__ == '__main__':
       img = Path('../img/lenna.png')
   
   if args.mode == 1:
-      hilbert_curve.draw(img, args.N)
+      hilbert_curve.draw_curve_on_img(img, args.N)
 
   
   elif args.mode == 2:
-      hilbert_curve.hilbert_order(args.N, args.N)
+      ordered = hilbert_curve.hilbert_order(args.N, args.N)
+      print(ordered)

@@ -7,10 +7,10 @@ name = "pypi"
 pillow = "*"
 numpy = "*"
 matplotlib = "*"
-opencv-python = "*"
-
-[dev-packages]
+opencv-contrib-python = "==4.5.2.54"
+tensorflow = "==2.2.0"
 jupyterlab = "*"
+scipy = "*"
 
 [requires]
-python_version = "3.8"
+python_version = "3.8.2"

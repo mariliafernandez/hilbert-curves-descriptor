@@ -6,8 +6,16 @@ import numpy as np
 
 def index2xy(index, N, im_size=None):
 
-    if im_size == None or N > im_size:
-        N = im_size
+    if im_size == None:
+        height = N
+        width = N
+    else:
+        width = im_size[0]
+        height = im_size[1]
+
+        
+    # if N > im_size:
+        # N = im_size
         
     # x, y positions in N=2
     positions = [
@@ -47,10 +55,9 @@ def index2xy(index, N, im_size=None):
             
         index = index >> 2
         n *= 2
-        
     
-    x, y = im_size//N*x, im_size//N*y
-        
+    x, y = round(width/N*x), round(height/N*y)
+
     return x, y
 
 
@@ -61,27 +68,67 @@ def hilbert_order(N, im_size=None):
         pixel_coord = index2xy(i, N, im_size)
         img_curve.append(pixel_coord)
     
-    return np.asarray(img_curve).flatten()
+    return np.asarray(img_curve)
 
 
-def draw_curve_on_img(img, N):
-    curve = hilbert_order(N, img.size[0])
+def draw_curve_on_img(original_img, N):
+
+    img = original_img.copy()
+    curve = hilbert_order(N, img.size)
+
     draw = ImageDraw.Draw(img)
+    draw.line(list(curve.flatten()), width=1, fill=128)
 
-    draw.line(list(curve), width=1, fill=128)
-    
     return img
 
 
-def draw(img_path, N):
-    label  = PurePath(img_path).parts[-2]
-    name = img_path.stem
+def pixel_values(img, curve_coordinates):
 
-    with Image.open(img_path) as f:
-        img = f.copy()
+    curve_pixels = []
+    img = np.asarray(img)
 
-    img = draw_curve_on_img(img, N)
-    img.save(Path(f'img/hilbert/cifar/{label}/{name}_{N}.png'))
-
-
+    for coord in curve_coordinates:
+        curve_pixels.append(img[coord[0], coord[1]])
     
+    return curve_pixels
+    
+
+def statistical_measures(pixel_curve):
+
+    intensity_diff = []
+    print(pixel_curve)
+    for i in range(len(pixel_curve)):
+        intensity_diff.append( pixel_curve[i+1] - pixel_curve[i] )
+
+    print(intensity_diff)
+
+    return intensity_diff
+
+
+def descriptor(img, kp):
+    curves = []
+    n = 2
+
+    while n <= min(img.size):
+        curve_coordinates = hilbert_order(n, img.size)
+        # draw = draw_curve_on_img(img, n)
+        # draw.save(f'../img/hilbert/{n}.png')
+        # print(np.sqrt(len(curve)))
+
+        if kp in curve_coordinates:
+            curve_pixels = pixel_values(img, curve_coordinates)
+            curves.append(curve_pixels)
+        n *= 2
+    
+
+
+import argparse
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('i', help="image")
+    args = parser.parse_args()
+
+    img = Image.open(args.i).convert('LA')
+    
+    descriptor(img, [10,43])

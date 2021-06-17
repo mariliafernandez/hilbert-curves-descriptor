@@ -1,10 +1,13 @@
 /img
 /cifar-10-batches-py
+/101_ObjectCategories
 *.png
 *.jpg
 *.jpeg
 
+*/.ipynb_checkpoints
 /.ipynb_checkpoints
+
 *.ipynb
 *.ipython-version
 .python-version
