@@ -3,6 +3,10 @@
 from PIL import Image, ImageDraw
 from pathlib import Path, PurePath
 import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import skew, kurtosis, entropy
+from descriptors import sift_descriptor, brisk_descriptor
+import cv2 as cv
 
 def index2xy(index, N, im_size=None):
 
@@ -68,7 +72,7 @@ def hilbert_order(N, im_size=None):
         pixel_coord = index2xy(i, N, im_size)
         img_curve.append(pixel_coord)
     
-    return np.asarray(img_curve)
+    return img_curve
 
 
 def draw_curve_on_img(original_img, N):
@@ -88,47 +92,102 @@ def pixel_values(img, curve_coordinates):
     img = np.asarray(img)
 
     for coord in curve_coordinates:
-        curve_pixels.append(img[coord[0], coord[1]])
+        curve_pixels.append(img[coord[1], coord[0]])
     
-    return curve_pixels
+    return np.asarray(curve_pixels)
     
 
 def statistical_measures(pixel_curve):
 
     intensity_diff = []
-    print(pixel_curve)
+
     for i in range(len(pixel_curve)):
-        intensity_diff.append( pixel_curve[i+1] - pixel_curve[i] )
+        intensity_diff.append( int(pixel_curve[i+1]) - int(pixel_curve[i]) )
 
-    print(intensity_diff)
-
-    return intensity_diff
+    return np.asarray(intensity_diff)
 
 
-def descriptor(img, kp):
-    curves = []
+def histogram(array):
+    
+    hist = np.zeros(256)
+            
+    for i in range(256):
+        hist[i] = int(np.count_nonzero(array == i))
+        
+    return np.asarray(hist)
+
+
+def keypoint_descriptor(img, kp):
+    
+    desc_array = []
     n = 2
 
     while n <= min(img.size):
+        
         curve_coordinates = hilbert_order(n, img.size)
-        # draw = draw_curve_on_img(img, n)
-        # draw.save(f'../img/hilbert/{n}.png')
-        # print(np.sqrt(len(curve)))
 
-        if kp in curve_coordinates:
-            curve_pixels = pixel_values(img, curve_coordinates)
-            curves.append(curve_pixels)
+        try:
+            kp_index = curve_coordinates.index(kp)
+        except ValueError:
+            # print(kp)
+            n *= 2
+            continue
+        
+        roi = curve_coordinates[kp_index-32:kp_index+32]
+        roi_pixels = pixel_values(img, roi)
+        
+        hist = histogram(roi_pixels) # Histogram of intensity values
+        prob_dist = hist/np.sum(hist)  # Probability distribution
+        
+        grad = np.gradient(roi_pixels)
+        
+        # Standard Deviation
+        std1 = np.std(roi_pixels)
+        std2 = np.std(grad)
+        
+        # Assimetry
+        assi1 = skew(roi_pixels)
+        assi2 = skew(grad)
+        
+        # Kurtosis
+        curt = kurtosis(prob_dist)
+        
+        # Entropy
+        entr = entropy(prob_dist)
+        
+        desc_array.append(np.asarray([std1,std2,assi1,assi2,curt,entr]))
+        # print(desc_array)
+            
         n *= 2
+        
+    return np.asarray(desc_array)
     
 
-
+def image_descriptor(img, keypoints=None):
+    
+    img_desc = []
+    
+    if keypoints == None:
+        sift = cv.SIFT_create()
+        keypoints = sift.detect(np.asarray(img))
+    
+    for kp in keypoints:
+        x, y = kp.pt
+        img_desc.append(keypoint_descriptor(img, (round(x), round(y))))
+    
+    return np.asarray(img_desc)
+    
+    
 import argparse
 
 if __name__ == '__main__':
+    
     parser = argparse.ArgumentParser()
     parser.add_argument('i', help="image")
     args = parser.parse_args()
 
-    img = Image.open(args.i).convert('LA')
+    img = Image.open(args.i).convert('L')
     
-    descriptor(img, [10,43])
+    img_desc = image_descriptor(img)
+    
+    print(img_desc)
