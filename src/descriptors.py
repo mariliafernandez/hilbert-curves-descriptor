@@ -8,10 +8,12 @@ from tensorflow.keras import layers
 
 def sift_descriptor(img):
     
-    gray = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
+    if len(img.shape) > 2:
+        img = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
+        
     sift = cv.SIFT_create()
 
-    keypoints, descriptors = sift.detectAndCompute(gray,None)
+    keypoints, descriptors = sift.detectAndCompute(img,None)
 
     return keypoints, descriptors
 
