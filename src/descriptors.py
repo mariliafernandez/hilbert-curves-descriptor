@@ -6,26 +6,28 @@ from tensorflow import keras
 from tensorflow.keras import layers
 
 
-def sift_descriptor(img):
+def keypoint_detector(img):
     
-    if len(img.shape) > 2:
-        img = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
-        
     sift = cv.SIFT_create()
-
-    keypoints, descriptors = sift.detectAndCompute(img,None)
-
-    return keypoints, descriptors
-
-
-def brisk_descriptor(img):
+    keypoints = sift.detect(img)
     
-    gray = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
+    return keypoints
+
+
+def sift_descriptor(img, keypoints):
+    
+    sift = cv.SIFT_create()
+    descriptors = sift.compute(img, keypoints)[1]
+
+    return descriptors
+
+
+def brisk_descriptor(img, keypoints):
+    
     brisk = cv.BRISK_create()
+    descriptors = brisk.compute(img, keypoints)[1]
 
-    keypoints, descriptors = brisk.detectAndCompute(gray,None)
-
-    return keypoints, descriptors
+    return descriptors
 
 
 def sift_match(img1, img2):

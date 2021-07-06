@@ -1,9 +1,11 @@
 /img
 /cifar-10-batches-py
 /101_ObjectCategories
+/dtd
 *.png
 *.jpg
 *.jpeg
+*.tar.gz
 
 */.ipynb_checkpoints
 /.ipynb_checkpoints

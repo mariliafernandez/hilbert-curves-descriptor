@@ -68,9 +68,9 @@ def hilbert_order(N, im_size):
     return curve_coordinates
 
 
-def draw_curve_on_img(original_img, curve_coordinates):
+def draw_curve_on_img(img_array, curve_coordinates):
 
-    img = original_img.copy()
+    img = Image.fromarray(img_array)
     draw = ImageDraw.Draw(img)
     curve_array = np.asarray(curve_coordinates)
     # curve = np.asarray(hilbert_order(N, img.size))
@@ -80,25 +80,14 @@ def draw_curve_on_img(original_img, curve_coordinates):
     return img
 
 
-def pixel_values(img, curve_coordinates):
+def pixel_values(img_array, curve_coordinates):
 
     curve_pixels = []
-    img = np.asarray(img)
 
     for coord in curve_coordinates:
-        curve_pixels.append(img[coord[1], coord[0]])
+        curve_pixels.append(img_array[coord[1], coord[0]])
     
     return np.asarray(curve_pixels)
-    
-
-def statistical_measures(pixel_curve):
-
-    intensity_diff = []
-
-    for i in range(len(pixel_curve)):
-        intensity_diff.append( int(pixel_curve[i+1]) - int(pixel_curve[i]) )
-
-    return np.asarray(intensity_diff)
 
 
 def histogram(array):
@@ -140,7 +129,9 @@ def roi_descriptor(roi):
     return np.asarray(desc_array)
     
 
-def image_descriptor(img, keypoints=None, max=None):
+def image_descriptor(img_array, keypoints=None, max=None):
+    
+    img = Image.fromarray(img_array)
     
     if max == None:
         max = len(keypoints)
@@ -148,11 +139,10 @@ def image_descriptor(img, keypoints=None, max=None):
     # Keypoints detection
     if keypoints == None:
         sift = cv.SIFT_create()
-        keypoints = sift.detect(np.asarray(img))
+        keypoints = sift.detect(img_array)
     
     kp_index = 0
     desc_list = []
-    
     curve_coordinates = hilbert_order(min(img.size), img.size)
     
     while kp_index < max:
@@ -162,7 +152,7 @@ def image_descriptor(img, keypoints=None, max=None):
         (x, y) = (int(kp.pt[0]), int(kp.pt[1]))
         
         # Region of interest
-        roi = roi_curve(img, curve_coordinates, kp)
+        roi = roi_curve(img_array, curve_coordinates, kp)
 
         neighborhood = [
             (x-1,y), (x+1,y), (x,y-1), (x,y+1), 
@@ -173,7 +163,7 @@ def image_descriptor(img, keypoints=None, max=None):
         while roi[0] is None and i < len(neighborhood):
 
             kp = neighborhood[i]
-            roi = roi_curve(img, curve_coordinates, kp)
+            roi = roi_curve(img_array, curve_coordinates, kp)
             i += 1
             
         # RoI descriptor
@@ -202,7 +192,7 @@ def roi_coordinates(curve_coordinates, kp):
         
     
     
-def roi_curve(img, curve_coordinates, kp):
+def roi_curve(img_array, curve_coordinates, kp):
     
     roi = roi_coordinates(curve_coordinates, kp)
     
@@ -210,7 +200,7 @@ def roi_curve(img, curve_coordinates, kp):
         return None, None
         
     else:
-        roi_pixels = pixel_values(img, roi)
+        roi_pixels = pixel_values(img_array, roi)
         return np.asarray(roi_pixels), np.asarray(roi)
 
     
