@@ -1,7 +1,7 @@
-/img
-/cifar-10-batches-py
-/101_ObjectCategories
-/dtd
+/caltech-101
+/texture-images
+/texture-images-processed
+
 *.png
 *.jpg
 *.jpeg

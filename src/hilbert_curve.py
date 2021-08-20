@@ -9,8 +9,10 @@ from descriptors import sift_descriptor, brisk_descriptor
 import cv2 as cv
 
 
-def index2xy(index, N, im_size):
-
+def index2xy(index, N:int, im_size):
+    """
+    Transforms index of hilbert curve to x,y coordinates
+    """
     width = im_size[0]
     height = im_size[1]
         
@@ -58,7 +60,10 @@ def index2xy(index, N, im_size):
     return x, y
 
 
-def hilbert_order(N, im_size):
+def hilbert_order(N:int, im_size):
+    """
+    Returns a list of coordinates in a Hilbert curve order
+    """
     curve_coordinates = []
 
     for i in range(0, N*N):
@@ -68,8 +73,10 @@ def hilbert_order(N, im_size):
     return curve_coordinates
 
 
-def draw_curve_on_img(img_array, curve_coordinates):
-
+def draw_curve_on_img(img_array:np.ndarray, curve_coordinates):
+    """
+    Returns an image with its Hilbert curve drawing
+    """
     img = Image.fromarray(img_array)
     draw = ImageDraw.Draw(img)
     curve_array = np.asarray(curve_coordinates)
@@ -80,8 +87,11 @@ def draw_curve_on_img(img_array, curve_coordinates):
     return img
 
 
-def pixel_values(img_array, curve_coordinates):
-
+def pixel_values(img_array:np.ndarray, curve_coordinates):
+    """
+    Returns a numpy array containing the pixel values 
+    in the img_array, in the given order in curve_coordinates
+    """
     curve_pixels = []
 
     for coord in curve_coordinates:
@@ -102,7 +112,6 @@ def histogram(array):
 
 def roi_descriptor(roi):
     
-    desc_array = []
     n = 2
 
     hist = histogram(roi) # Histogram of intensity values
@@ -124,28 +133,20 @@ def roi_descriptor(roi):
     # Entropy
     entr = entropy(prob_dist)
     
-    desc_array.append(np.asarray([std1,std2,assi1,assi2,curt,entr]))
+    desc_array = np.asarray([std1,std2,assi1,assi2,curt,entr])
         
-    return np.asarray(desc_array)
+    return desc_array
     
 
-def image_descriptor(img_array, keypoints=None, max=None):
+def image_descriptor(img_array:np.ndarray, keypoints):
     
-    img = Image.fromarray(img_array)
-    
-    if max == None:
-        max = len(keypoints)
-        
-    # Keypoints detection
-    if keypoints == None:
-        sift = cv.SIFT_create()
-        keypoints = sift.detect(img_array)
+    img = Image.fromarray(img_array).convert("L")
     
     kp_index = 0
     desc_list = []
     curve_coordinates = hilbert_order(min(img.size), img.size)
     
-    while kp_index < max:
+    while kp_index < len(keypoints):
 
         # Keypoint coordinates
         kp = keypoints[kp_index]
@@ -154,6 +155,7 @@ def image_descriptor(img_array, keypoints=None, max=None):
         # Region of interest
         roi = roi_curve(img_array, curve_coordinates, kp)
 
+        # If keypoint not in the curve, look for kp in the neighbothood
         neighborhood = [
             (x-1,y), (x+1,y), (x,y-1), (x,y+1), 
             (x+1, y+1), (x+1, y-1), (x-1, y-1), (x-1, y+1)
@@ -168,11 +170,11 @@ def image_descriptor(img_array, keypoints=None, max=None):
             
         # RoI descriptor
         if roi[0] is not None:
-            desc_list.extend(roi_descriptor(roi[0]))
+            desc_list.append(roi_descriptor(roi[0]))
         
         kp_index += 1
     
-    return np.asarray(desc_list, dtype='float32')
+    return np.asarray(desc_list)
     
 
 def roi_coordinates(curve_coordinates, kp):
@@ -192,7 +194,7 @@ def roi_coordinates(curve_coordinates, kp):
         
     
     
-def roi_curve(img_array, curve_coordinates, kp):
+def roi_curve(img_array:np.ndarray, curve_coordinates, kp):
     
     roi = roi_coordinates(curve_coordinates, kp)
     

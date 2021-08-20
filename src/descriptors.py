@@ -6,10 +6,10 @@ from tensorflow import keras
 from tensorflow.keras import layers
 
 
-def keypoint_detector(img):
+def keypoint_detector(img, mask):
     
     sift = cv.SIFT_create()
-    keypoints = sift.detect(img)
+    keypoints = sift.detect(img, mask)
     
     return keypoints
 
